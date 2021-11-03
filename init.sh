@@ -24,17 +24,17 @@ az aks get-credentials -n $AKS_NAME -g $RESOURCE_GROUP_NAME
 
 echo "Creating ACR..."
 az acr create -n $ACR_NAME -g $RESOURCE_GROUP_NAME --sku basic
-az acr update -n $ACR_NAME --admin-enabled true
+az acr update -n $ACR_NAME -g $RESOURCE_GROUP_NAME --admin-enabled true
 
-export ACR_USERNAME=$(az acr credential show -n $ACR_NAME --query "username" -o tsv)
-export ACR_PASSWORD=$(az acr credential show -n $ACR_NAME --query "passwords[0].value" -o tsv)
+export ACR_USERNAME=$(az acr credential show -n $ACR_NAME -g $RESOURCE_GROUP_NAME --query "username" -o tsv)
+export ACR_PASSWORD=$(az acr credential show -n $ACR_NAME -g $RESOURCE_GROUP_NAME --query "passwords[0].value" -o tsv)
 
 az aks update \
     --name $AKS_NAME \
     --resource-group $RESOURCE_GROUP_NAME \
     --attach-acr $ACR_NAME
 
-export DNS_NAME=$(az network dns zone list -o json --query "[?contains(resourceGroup,'$RESOURCE_GROUP_NAME')].name" -o tsv)
+export DNS_NAME=$(az network dns zone list -g $RESOURCE_GROUP_NAME -o json --query "[?contains(resourceGroup,'$RESOURCE_GROUP_NAME')].name" -o tsv)
 
 sed -i '' 's+!IMAGE!+'"$ACR_NAME"'/contoso-website+g' kubernetes/deployment.yaml
 sed -i '' 's+!DNS!+'"$DNS_NAME"'+g' kubernetes/ingress.yaml
