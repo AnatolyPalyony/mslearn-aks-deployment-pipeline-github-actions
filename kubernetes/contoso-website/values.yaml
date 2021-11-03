@@ -1,5 +1,5 @@
 image:
-  registry: <your-acr-name>
+  registry: contosocontainerregistry14999.azurecr.io
   name: contoso-website
   tag: latest
 
